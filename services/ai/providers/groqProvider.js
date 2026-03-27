@@ -1,0 +1,66 @@
+const fs = require("node:fs");
+const Groq = require("groq-sdk");
+const { coachResponseSchema } = require("../coachSchema");
+const { AppError } = require("../../../utils/errors");
+const { buildCoachSystemPrompt, buildCoachUserPrompt } = require("../../../utils/promptBuilder");
+
+let client = null;
+
+function getClient() {
+  if (client) {
+    return client;
+  }
+
+  if (!process.env.GROQ_API_KEY) {
+    throw new AppError("GROQ_API_KEY is missing. Add it to your .env file.", 500);
+  }
+
+  client = new Groq({
+    apiKey: process.env.GROQ_API_KEY
+  });
+
+  return client;
+}
+
+async function generateCoaching({ question, mode, resumeText }) {
+  const groq = getClient();
+  const completion = await groq.chat.completions.create({
+    model: process.env.GROQ_CHAT_MODEL || "llama-3.3-70b-versatile",
+    temperature: 0.2,
+    response_format: {
+      type: "json_object"
+    },
+    messages: [
+      {
+        role: "system",
+        content: `${buildCoachSystemPrompt({ mode, resumeText })}\nReturn valid JSON only.`
+      },
+      {
+        role: "user",
+        content: buildCoachUserPrompt(question)
+      }
+    ]
+  });
+
+  const content = completion.choices[0]?.message?.content || "{}";
+  return coachResponseSchema.parse(JSON.parse(content));
+}
+
+async function transcribeAudio({ filePath }) {
+  const groq = getClient();
+
+  const transcription = await groq.audio.transcriptions.create({
+    file: fs.createReadStream(filePath),
+    model: process.env.GROQ_TRANSCRIBE_MODEL || "whisper-large-v3-turbo",
+    language: process.env.TRANSCRIBE_LANGUAGE || "en",
+    response_format: "json",
+    temperature: 0
+  });
+
+  return transcription.text || "";
+}
+
+module.exports = {
+  generateCoaching,
+  transcribeAudio
+};

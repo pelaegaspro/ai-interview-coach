@@ -1,0 +1,65 @@
+{
+  "name": "ai-interview-coach",
+  "version": "1.0.0",
+  "description": "Real-time Windows desktop interview assistant built with Electron, React, TailwindCSS, Express, and OpenAI or Groq APIs.",
+  "main": "electron/main.js",
+  "author": "OpenAI Codex",
+  "license": "MIT",
+  "scripts": {
+    "dev": "concurrently -k \"npm:dev:frontend\" \"npm:dev:electron\"",
+    "dev:frontend": "vite",
+    "dev:electron": "nodemon --watch electron --watch backend --watch services --watch utils --ext js,json --exec \"npm run start:electron\"",
+    "start:electron": "wait-on tcp:5173 && cross-env NODE_ENV=development VITE_DEV_SERVER_URL=http://127.0.0.1:5173 electron .",
+    "start": "cross-env NODE_ENV=production electron .",
+    "build": "vite build && electron-builder",
+    "build:portable": "vite build && electron-builder --win portable && node scripts/rename-portable-output.mjs",
+    "preview": "vite preview"
+  },
+  "build": {
+    "appId": "com.openai.aiinterviewcoach",
+    "productName": "AI Interview Coach",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "electron/**/*",
+      "backend/**/*",
+      "services/**/*",
+      "utils/**/*",
+      "dist/**/*",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": "nsis",
+      "artifactName": "AI-Interview-Coach-Setup-${version}.${ext}",
+      "signAndEditExecutable": false,
+      "verifyUpdateCodeSignature": false
+    }
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "groq-sdk": "^0.15.0",
+    "multer": "^2.0.2",
+    "openai": "^4.79.0",
+    "pdf-parse": "^1.1.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
+    "autoprefixer": "^10.4.20",
+    "concurrently": "^9.0.1",
+    "cross-env": "^7.0.3",
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3",
+    "nodemon": "^3.1.4",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "vite": "^5.4.8",
+    "wait-on": "^8.0.1"
+  }
+}
