@@ -4,18 +4,23 @@ const { isSupportedMode } = require("../../utils/constants");
 
 async function handleAsk(req, res, next) {
   try {
-    const question = typeof req.body.question === "string" ? req.body.question.trim() : "";
+    const transcript =
+      typeof req.body.transcript === "string"
+        ? req.body.transcript.trim()
+        : typeof req.body.question === "string"
+          ? req.body.question.trim()
+          : "";
     const mode = typeof req.body.mode === "string" ? req.body.mode.trim() : "";
 
-    if (!question) {
-      throw new AppError("The `question` field is required.", 400);
+    if (!transcript) {
+      throw new AppError("The `transcript` field is required.", 400);
     }
 
     if (!isSupportedMode(mode)) {
       throw new AppError("The selected interview mode is not supported.", 400);
     }
 
-    const result = await generateCoaching({ question, mode });
+    const result = await generateCoaching({ transcript, mode });
     res.json(result);
   } catch (error) {
     next(error);

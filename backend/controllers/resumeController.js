@@ -8,6 +8,14 @@ async function handleResumeUpload(req, res, next) {
       throw new AppError("Upload a PDF resume in the `resume` field.", 400);
     }
 
+    const isPdfUpload =
+      req.file.mimetype === "application/pdf" ||
+      req.file.originalname.toLowerCase().endsWith(".pdf");
+
+    if (!isPdfUpload) {
+      throw new AppError("Only PDF resume uploads are supported.", 400);
+    }
+
     const resumeText = await parseResumeBuffer(req.file.buffer);
 
     if (!resumeText) {

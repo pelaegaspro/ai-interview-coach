@@ -14,7 +14,7 @@ AI Interview Coach is a Windows desktop overlay app built with Electron, React, 
   - Follow-up suggestion
   - Coaching tips
 - Resume-aware prompting with PDF upload and in-memory context
-- Interview modes for Data Analyst, Behavioral (HR), and SQL / Python Technical
+- Interview modes for General, Data Analyst, Behavioral (HR), and SQL / Python Technical
 - Transparent always-on-top overlay with adjustable opacity
 - Optional click-through mode, disabled by default
 - Global overlay hotkeys:
@@ -104,7 +104,7 @@ npm run build
   - Form field: `audio`
   - Returns transcribed text for an audio chunk
 - `POST /ask`
-  - JSON body: `{ "question": "text", "mode": "behavioral" }`
+  - JSON body: `{ "transcript": "text", "mode": "behavioral" }`
   - Returns structured coaching output
 - `POST /resume/upload`
   - Form field: `resume`
@@ -126,4 +126,3 @@ npm run build
 - Speech capture: `navigator.mediaDevices.getUserMedia` + `MediaRecorder`
 - PDF parsing: `pdf-parse`
 - Structured output validation: `zod`
-

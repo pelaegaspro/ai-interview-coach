@@ -22,14 +22,14 @@ function buildCoachSystemPrompt({ mode, resumeText }) {
   ].join("\n\n");
 }
 
-function buildCoachUserPrompt(question) {
+function buildCoachUserPrompt(transcript) {
   return [
     "Use the live transcript below as the latest interview context.",
     "Provide a concise draft answer plus coaching suggestions.",
     "If you are not confident about the exact question, still provide the best helpful interpretation.",
     "",
     "Live transcript:",
-    question
+    transcript
   ].join("\n");
 }
 

@@ -23,7 +23,7 @@ function getClient() {
   return client;
 }
 
-async function generateCoaching({ question, mode, resumeText }) {
+async function generateCoaching({ transcript, mode, resumeText }) {
   const openai = getClient();
   const completion = await openai.chat.completions.parse({
     model: process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini",
@@ -35,7 +35,7 @@ async function generateCoaching({ question, mode, resumeText }) {
       },
       {
         role: "user",
-        content: buildCoachUserPrompt(question)
+        content: buildCoachUserPrompt(transcript)
       }
     ],
     response_format: zodResponseFormat(coachResponseSchema, "interview_coach_response")

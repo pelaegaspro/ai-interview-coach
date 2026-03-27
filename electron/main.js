@@ -11,6 +11,8 @@ const { startServer, stopServer } = require("../backend/server");
 const {
   DEFAULT_BACKEND_PORT,
   DEFAULT_OVERLAY_OPACITY,
+  MIN_OVERLAY_OPACITY,
+  MAX_OVERLAY_OPACITY,
   OVERLAY_SHORTCUT_ACCELERATOR,
   CLICK_THROUGH_SHORTCUT_ACCELERATOR,
   OVERLAY_SHORTCUT_LABEL,
@@ -58,7 +60,10 @@ function applyClickThrough(enabled) {
 }
 
 function applyOpacity(opacity) {
-  const clampedOpacity = Math.max(0.6, Math.min(0.95, Number(opacity) || DEFAULT_OVERLAY_OPACITY));
+  const clampedOpacity = Math.max(
+    MIN_OVERLAY_OPACITY,
+    Math.min(MAX_OVERLAY_OPACITY, Number(opacity) || DEFAULT_OVERLAY_OPACITY)
+  );
   overlayState.opacity = clampedOpacity;
 
   if (mainWindow && !mainWindow.isDestroyed()) {
@@ -100,6 +105,10 @@ function registerGlobalShortcuts() {
 function registerIpcHandlers() {
   ipcMain.handle("app:get-config", () => ({
     backendUrl: `http://127.0.0.1:${DEFAULT_BACKEND_PORT}`,
+    overlayRange: {
+      min: MIN_OVERLAY_OPACITY,
+      max: MAX_OVERLAY_OPACITY
+    },
     shortcuts: {
       visibility: OVERLAY_SHORTCUT_LABEL,
       clickThrough: CLICK_THROUGH_SHORTCUT_LABEL

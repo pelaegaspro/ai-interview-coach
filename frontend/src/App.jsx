@@ -11,7 +11,7 @@ function App() {
   const overlay = useOverlayState();
 
   const activeModeLabel =
-    INTERVIEW_MODES.find((item) => item.id === coach.mode)?.label || "Behavioral (HR)";
+    INTERVIEW_MODES.find((item) => item.id === coach.mode)?.label || "General";
 
   return (
     <div className="min-h-screen bg-transparent p-3 text-slate-100">
@@ -45,6 +45,7 @@ function App() {
             onResumeUpload={coach.uploadResume}
             resumeStatus={coach.resumeStatus}
             opacity={overlay.overlay.opacity}
+            overlayRange={overlay.appConfig.overlayRange}
             clickThrough={overlay.overlay.clickThrough}
             onOpacityChange={overlay.setOpacity}
             onClickThroughChange={overlay.setClickThrough}

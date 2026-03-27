@@ -3,11 +3,11 @@ const { getAIProvider, getSelectedProvider } = require("./providerFactory");
 const { DEFAULT_MODE } = require("../../utils/constants");
 const { cleanList, normalizeWhitespace } = require("../../utils/text");
 
-async function generateCoaching({ question, mode = DEFAULT_MODE }) {
+async function generateCoaching({ transcript, mode = DEFAULT_MODE }) {
   const provider = getAIProvider();
   const resumeText = sessionStore.getResumeText();
   const result = await provider.generateCoaching({
-    question,
+    transcript,
     mode,
     resumeText
   });

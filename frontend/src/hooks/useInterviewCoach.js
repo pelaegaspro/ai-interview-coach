@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { askCoach, uploadAudioChunk, uploadResumePdf } from "../lib/apiClient";
-import { AUDIO_CHUNK_MS, DEFAULT_MODE, getSupportedRecorderMimeType } from "../lib/media";
+import {
+  AUDIO_CHUNK_MS,
+  DEFAULT_MODE,
+  MAX_TRANSCRIPTION_QUEUE_DEPTH,
+  RECENT_DUPLICATE_WINDOW_MS,
+  getSupportedRecorderMimeType
+} from "../lib/media";
 
 export function useInterviewCoach() {
   const [mode, setMode] = useState(DEFAULT_MODE);
@@ -22,6 +28,7 @@ export function useInterviewCoach() {
   const isProcessingQueueRef = useRef(false);
   const askTimeoutRef = useRef(null);
   const askAbortRef = useRef(null);
+  const sessionVersionRef = useRef(0);
 
   const transcriptText = useMemo(
     () => transcriptSegments.map((segment) => segment.text).join(" "),
@@ -56,14 +63,23 @@ export function useInterviewCoach() {
     while (transcriptionQueueRef.current.length > 0) {
       const nextChunk = transcriptionQueueRef.current.shift();
 
+      if (!nextChunk || nextChunk.sessionVersion !== sessionVersionRef.current) {
+        continue;
+      }
+
       try {
-        const response = await uploadAudioChunk(nextChunk);
+        const response = await uploadAudioChunk(nextChunk.blob);
         const cleanedText = String(response.text || "").trim();
 
-        if (cleanedText) {
+        if (cleanedText && nextChunk.sessionVersion === sessionVersionRef.current) {
           setTranscriptSegments((current) => {
-            const previous = current[current.length - 1]?.text?.toLowerCase();
-            if (previous === cleanedText.toLowerCase()) {
+            const previous = current[current.length - 1];
+            const isRecentDuplicate =
+              previous &&
+              previous.text.toLowerCase() === cleanedText.toLowerCase() &&
+              Date.now() - previous.createdAt < RECENT_DUPLICATE_WINDOW_MS;
+
+            if (isRecentDuplicate) {
               return current;
             }
 
@@ -71,7 +87,8 @@ export function useInterviewCoach() {
               ...current,
               {
                 id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-                text: cleanedText
+                text: cleanedText,
+                createdAt: Date.now()
               }
             ].slice(-40);
           });
@@ -91,7 +108,15 @@ export function useInterviewCoach() {
         return;
       }
 
-      transcriptionQueueRef.current.push(blob);
+      transcriptionQueueRef.current.push({
+        blob,
+        sessionVersion: sessionVersionRef.current
+      });
+
+      while (transcriptionQueueRef.current.length > MAX_TRANSCRIPTION_QUEUE_DEPTH) {
+        transcriptionQueueRef.current.shift();
+      }
+
       processTranscriptionQueue();
     },
     [processTranscriptionQueue]
@@ -162,11 +187,14 @@ export function useInterviewCoach() {
   }, [stopTracks]);
 
   const clearSession = useCallback(() => {
+    sessionVersionRef.current += 1;
     transcriptionQueueRef.current = [];
     window.clearTimeout(askTimeoutRef.current);
     setTranscriptSegments([]);
     setCoaching(null);
     setError("");
+    setIsGenerating(false);
+    setIsTranscribing(false);
 
     if (askAbortRef.current) {
       askAbortRef.current.abort();
@@ -234,7 +262,7 @@ export function useInterviewCoach() {
       try {
         const response = await askCoach(
           {
-            question: liveContext,
+            transcript: liveContext,
             mode
           },
           controller.signal

@@ -22,7 +22,7 @@ function getClient() {
   return client;
 }
 
-async function generateCoaching({ question, mode, resumeText }) {
+async function generateCoaching({ transcript, mode, resumeText }) {
   const groq = getClient();
   const completion = await groq.chat.completions.create({
     model: process.env.GROQ_CHAT_MODEL || "llama-3.3-70b-versatile",
@@ -37,7 +37,7 @@ async function generateCoaching({ question, mode, resumeText }) {
       },
       {
         role: "user",
-        content: buildCoachUserPrompt(question)
+        content: buildCoachUserPrompt(transcript)
       }
     ]
   });

@@ -14,6 +14,7 @@ function ControlPanel({
   onResumeUpload,
   resumeStatus,
   opacity,
+  overlayRange,
   clickThrough,
   onOpacityChange,
   onClickThroughChange,
@@ -23,6 +24,8 @@ function ControlPanel({
 }) {
   const micTone =
     permissionStatus === "denied" ? "rose" : permissionStatus === "prompt" ? "amber" : "slate";
+  const minOpacity = Math.round((overlayRange?.min ?? 0.6) * 100);
+  const maxOpacity = Math.round((overlayRange?.max ?? 0.95) * 100);
 
   return (
     <section className="glass-panel p-4">
@@ -116,8 +119,8 @@ function ControlPanel({
 
           <input
             type="range"
-            min="60"
-            max="90"
+            min={minOpacity}
+            max={maxOpacity}
             step="1"
             value={Math.round(opacity * 100)}
             onChange={(event) => onOpacityChange(Number(event.target.value) / 100)}

@@ -3,6 +3,10 @@ let cachedConfigPromise;
 function getFallbackConfig() {
   return {
     backendUrl: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8787",
+    overlayRange: {
+      min: 0.6,
+      max: 0.95
+    },
     shortcuts: {
       visibility: "Ctrl+Shift+A",
       clickThrough: "Ctrl+Shift+M"
