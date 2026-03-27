@@ -1,16 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getFallbackAppConfig } from "../lib/appConfig";
 
-const fallbackConfig = {
-  backendUrl: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8787",
-  overlayRange: {
-    min: 0.6,
-    max: 0.95
-  },
-  shortcuts: {
-    visibility: "Ctrl+Shift+A",
-    clickThrough: "Ctrl+Shift+M"
-  }
-};
+const fallbackConfig = getFallbackAppConfig();
 
 const fallbackOverlayState = {
   opacity: 0.85,

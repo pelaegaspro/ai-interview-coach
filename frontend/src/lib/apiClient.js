@@ -1,24 +1,12 @@
-let cachedConfigPromise;
+import { getFallbackAppConfig } from "./appConfig";
 
-function getFallbackConfig() {
-  return {
-    backendUrl: import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8787",
-    overlayRange: {
-      min: 0.6,
-      max: 0.95
-    },
-    shortcuts: {
-      visibility: "Ctrl+Shift+A",
-      clickThrough: "Ctrl+Shift+M"
-    }
-  };
-}
+let cachedConfigPromise;
 
 export async function getAppConfig() {
   if (!cachedConfigPromise) {
     cachedConfigPromise = window.overlayApi?.getConfig
-      ? window.overlayApi.getConfig().catch(() => getFallbackConfig())
-      : Promise.resolve(getFallbackConfig());
+      ? window.overlayApi.getConfig().catch(() => getFallbackAppConfig())
+      : Promise.resolve(getFallbackAppConfig());
   }
 
   return cachedConfigPromise;
