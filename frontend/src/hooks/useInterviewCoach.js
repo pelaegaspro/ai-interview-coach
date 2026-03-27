@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { askCoach, uploadAudioChunk, uploadResumePdf } from "../lib/apiClient";
+import { streamAsk, uploadAudioChunk, uploadResumePdf } from "../lib/apiClient";
 import {
   AUDIO_CHUNK_MS,
   DEFAULT_MODE,
@@ -10,6 +10,10 @@ import {
 
 export function useInterviewCoach() {
   const [mode, setMode] = useState(DEFAULT_MODE);
+  const [experience, setExperience] = useState("Professional");
+  const [jobJd, setJobJd] = useState("");
+  const [aiModel, setAiModel] = useState("gpt-5");
+  const [language, setLanguage] = useState("auto");
   const [transcriptSegments, setTranscriptSegments] = useState([]);
   const [coaching, setCoaching] = useState(null);
   const [error, setError] = useState("");
@@ -68,7 +72,7 @@ export function useInterviewCoach() {
       }
 
       try {
-        const response = await uploadAudioChunk(nextChunk.blob);
+        const response = await uploadAudioChunk(nextChunk.blob, language);
         const cleanedText = String(response.text || "").trim();
 
         if (cleanedText && nextChunk.sessionVersion === sessionVersionRef.current) {
@@ -100,11 +104,17 @@ export function useInterviewCoach() {
 
     isProcessingQueueRef.current = false;
     setIsTranscribing(false);
-  }, []);
+  }, [language]);
 
   const enqueueAudioChunk = useCallback(
     (blob) => {
       if (!blob || blob.size === 0) {
+        return;
+      }
+
+      // Basic silence detection (VAD heuristic)
+      // WebM containers for 4s of absolute silence are generally very small
+      if (blob.size < 1000) {
         return;
       }
 
@@ -259,20 +269,54 @@ export function useInterviewCoach() {
       askAbortRef.current = controller;
       setIsGenerating(true);
 
+      const streamTimeout = window.setTimeout(() => {
+        controller.abort();
+      }, 15000);
+
       try {
-        const response = await askCoach(
+        let buffer = "";
+        const finalResponse = await streamAsk(
           {
             transcript: liveContext,
-            mode
+            mode,
+            experience,
+            jobJd,
+            model: aiModel
           },
-          controller.signal
+          controller.signal,
+          (delta) => {
+            buffer += delta;
+            
+            try {
+              let parseBuffer = buffer;
+              const start = parseBuffer.indexOf("{");
+              const end = parseBuffer.lastIndexOf("}");
+              if (start !== -1 && end !== -1 && end >= start) {
+                parseBuffer = parseBuffer.slice(start, end + 1);
+              }
+              const partial = JSON.parse(parseBuffer);
+              setCoaching(partial);
+            } catch (e) {
+              const shortMatch = buffer.match(/"shortAnswer"\s*:\s*"([^"\\]*(?:\\.[^"\\]*)*)/);
+              if (shortMatch) {
+                setCoaching((prev) => ({
+                  ...(prev || { bulletPoints: [], coachingTips: [], keywords: [], followUpSuggestion: "", starSuggestion: "" }),
+                  shortAnswer: shortMatch[1].replace(/\\n/g, '\n').replace(/\\"/g, '"')
+                }));
+              }
+            }
+          }
         );
-        setCoaching(response);
+        
+        if (finalResponse) {
+          setCoaching(finalResponse);
+        }
       } catch (requestError) {
         if (requestError.name !== "AbortError") {
           setError(requestError.message);
         }
       } finally {
+        window.clearTimeout(streamTimeout);
         if (askAbortRef.current === controller) {
           askAbortRef.current = null;
         }
@@ -284,7 +328,7 @@ export function useInterviewCoach() {
     return () => {
       window.clearTimeout(askTimeoutRef.current);
     };
-  }, [liveContext, mode]);
+  }, [liveContext, mode, experience, jobJd, aiModel]);
 
   useEffect(() => {
     return () => {
@@ -302,6 +346,14 @@ export function useInterviewCoach() {
   return {
     mode,
     setMode,
+    experience,
+    setExperience,
+    jobJd,
+    setJobJd,
+    aiModel,
+    setAiModel,
+    language,
+    setLanguage,
     transcriptSegments,
     transcriptText,
     coaching,

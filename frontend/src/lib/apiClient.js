@@ -83,9 +83,12 @@ async function request(path, options = {}) {
   }
 }
 
-export async function uploadAudioChunk(blob) {
+export async function uploadAudioChunk(blob, language) {
   const formData = new FormData();
   formData.append("audio", blob, `audio-${Date.now()}.webm`);
+  if (language && language !== "auto") {
+    formData.append("language", language);
+  }
 
   return request("/transcribe", {
     method: "POST",
@@ -93,8 +96,9 @@ export async function uploadAudioChunk(blob) {
   });
 }
 
-export async function askCoach(payload, signal) {
-  return request("/ask", {
+export async function streamAsk(payload, signal, onChunk) {
+  const { backendUrl } = await getAppConfig();
+  const response = await fetch(`${backendUrl}/ask`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -102,6 +106,37 @@ export async function askCoach(payload, signal) {
     body: JSON.stringify(payload),
     signal
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || "Failed to stream coaching.");
+  }
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    const chunk = decoder.decode(value, { stream: true });
+    const lines = chunk.split("\n");
+
+    for (const line of lines) {
+      if (line.startsWith("data: ")) {
+        const dataStr = line.slice(6);
+        if (!dataStr) continue;
+        try {
+          const parsed = JSON.parse(dataStr);
+          if (parsed.error) throw new Error(parsed.error);
+          if (parsed.done) return parsed.final;
+          if (parsed.delta) onChunk(parsed.delta);
+        } catch (e) {
+          // ignore parsing error for chunk
+        }
+      }
+    }
+  }
 }
 
 export async function uploadResumePdf(file) {

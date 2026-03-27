@@ -17,7 +17,7 @@
   },
   "build": {
     "appId": "com.openai.aiinterviewcoach",
-    "productName": "AI Interview Coach",
+    "productName": "SilentAssist AI",
     "directories": {
       "output": "release"
     },

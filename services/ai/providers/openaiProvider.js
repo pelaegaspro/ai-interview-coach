@@ -41,8 +41,9 @@ function getClient() {
   return client;
 }
 
-async function generateCoaching({ transcript, mode, resumeText }) {
+async function generateCoaching({ transcript, mode, experience, jobJd, model, resumeText, type, onChunk, signal }) {
   const openai = getClient();
+<<<<<<< Updated upstream
   const completion = await withRetry(() =>
     openai.chat.completions.parse({
       model: process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini",
@@ -60,13 +61,55 @@ async function generateCoaching({ transcript, mode, resumeText }) {
       response_format: zodResponseFormat(coachResponseSchema, "interview_coach_response")
     })
   );
+=======
+  let mappedModel = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
+  if (model === "gpt-5") mappedModel = "gpt-4o";
+  else if (model === "gpt-4.1") mappedModel = "gpt-4-turbo";
+>>>>>>> Stashed changes
 
-  return completion.choices[0]?.message?.parsed;
+  let stream;
+  try {
+    stream = await openai.chat.completions.create({
+      model: mappedModel,
+      temperature: 0.2,
+      stream: true,
+      messages: [
+        {
+          role: "system",
+          content: buildCoachSystemPrompt({ mode, experience, jobJd, resumeText, type })
+        },
+        {
+          role: "user",
+          content: buildCoachUserPrompt(transcript)
+        }
+      ],
+      response_format: { type: "json_object" }
+    }, { signal });
+  } catch (e) {
+    if (e.name === "AbortError" || e.message?.toLowerCase().includes("abort")) return {};
+    throw e;
+  }
+
+  let fullText = "";
+  for await (const chunk of stream) {
+    const delta = chunk.choices?.[0]?.delta?.content || "";
+    if (delta) {
+      fullText += delta;
+      if (onChunk) onChunk(delta, fullText);
+    }
+  }
+
+  try {
+    return JSON.parse(fullText);
+  } catch (e) {
+    return {};
+  }
 }
 
-async function transcribeAudio({ filePath }) {
+async function transcribeAudio({ filePath, language }) {
   const openai = getClient();
 
+<<<<<<< Updated upstream
   const transcription = await withRetry(() =>
     openai.audio.transcriptions.create({
       file: fs.createReadStream(filePath),
@@ -74,11 +117,25 @@ async function transcribeAudio({ filePath }) {
       language: process.env.TRANSCRIBE_LANGUAGE || "en"
     })
   );
+=======
+  const transcriptionOptions = {
+    file: fs.createReadStream(filePath),
+    model: process.env.OPENAI_TRANSCRIBE_MODEL || "whisper-1"
+  };
+
+  const finalLanguage = (language && language !== "auto") ? language : process.env.TRANSCRIBE_LANGUAGE;
+  if (finalLanguage && finalLanguage !== "auto") {
+    transcriptionOptions.language = finalLanguage;
+  }
+
+  const transcription = await openai.audio.transcriptions.create(transcriptionOptions);
+>>>>>>> Stashed changes
 
   return transcription.text || "";
 }
 
 module.exports = {
   generateCoaching,
-  transcribeAudio
+  transcribeAudio,
+  getClient
 };

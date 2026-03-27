@@ -38,16 +38,69 @@ function CoachPanel({ coaching, isGenerating, provider }) {
           </p>
         </div>
 
-        <div className="text-right text-xs text-slate-400">
-          <p>{isGenerating ? "Refreshing..." : "Up to date"}</p>
-          <p>{provider ? `Provider: ${provider}` : ""}</p>
+        <div className="text-right flex flex-col items-end gap-1">
+          <div className="text-xs text-slate-400">
+            <p>{isGenerating ? "Refreshing..." : "Up to date"}</p>
+            <p>{provider ? `Provider: ${provider}` : ""}</p>
+          </div>
+          {coaching.type && coaching.confidence && (
+            <div 
+              className="mt-1 text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border"
+              style={{
+                color: coaching.confidence > 0.85 ? "#4ade80" : coaching.confidence > 0.7 ? "#facc15" : "#f87171",
+                borderColor: coaching.confidence > 0.85 ? "#4ade8055" : coaching.confidence > 0.7 ? "#facc1555" : "#f8717155",
+                backgroundColor: coaching.confidence > 0.85 ? "#4ade8011" : coaching.confidence > 0.7 ? "#facc1511" : "#f8717111"
+              }}
+            >
+              🧠 {coaching.type.replace('_', ' ')} • {(coaching.confidence * 100).toFixed(0)}% CONFIDENCE
+            </div>
+          )}
         </div>
       </div>
 
+<<<<<<< Updated upstream
       <div style={{ maxHeight: "340px", overflowY: "auto", paddingRight: "4px" }}>
         <div className="mt-4 grid gap-3">
           <Section title="Short Answer">
             <p className="leading-6 text-slate-50">{coaching.shortAnswer}</p>
+=======
+      <div className="mt-4 grid gap-3">
+        <Section title="Short Answer">
+          <p className="leading-6 text-slate-50">{coaching.shortAnswer}</p>
+          {coaching.score && (
+            <div className="mt-3 border-t border-white/5 pt-3 flex items-center gap-3">
+              <div 
+                className="text-[10px] uppercase font-bold tracking-widest px-2 py-0.5 rounded border"
+                style={{
+                  color: coaching.score > 85 ? "#4ade80" : coaching.score > 70 ? "#facc15" : "#f87171",
+                  borderColor: coaching.score > 85 ? "#4ade8055" : coaching.score > 70 ? "#facc1555" : "#f8717155",
+                  backgroundColor: coaching.score > 85 ? "#4ade8011" : coaching.score > 70 ? "#facc1511" : "#f8717111"
+                }}
+              >
+                ⭐ SCORE: {coaching.score}/100
+              </div>
+              <div className="text-[11px] italic text-slate-400">
+                {coaching.feedback}
+              </div>
+            </div>
+          )}
+        </Section>
+
+        <Section title="Bullet Points">
+          <ul className="space-y-2">
+            {coaching.bulletPoints.map((point) => (
+              <li key={point} className="flex gap-2 leading-6 text-slate-100">
+                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-cyan-300" />
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+        </Section>
+
+        {coaching.starSuggestion ? (
+          <Section title="STAR Suggestion">
+            <p className="leading-6 text-slate-100">{coaching.starSuggestion}</p>
+>>>>>>> Stashed changes
           </Section>
 
           <Section title="Bullet Points">

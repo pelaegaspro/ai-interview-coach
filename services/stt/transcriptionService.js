@@ -2,7 +2,7 @@ const path = require("node:path");
 const { getAIProvider } = require("../ai/providerFactory");
 const { withTempFile } = require("../../utils/files");
 
-async function transcribeBuffer({ buffer, filename = "chunk.webm", mimetype = "audio/webm" }) {
+async function transcribeBuffer({ buffer, filename = "chunk.webm", mimetype = "audio/webm", language }) {
   const provider = getAIProvider();
   const extension = path.extname(filename) || guessExtension(mimetype);
 
@@ -10,7 +10,8 @@ async function transcribeBuffer({ buffer, filename = "chunk.webm", mimetype = "a
     const text = await provider.transcribeAudio({
       filePath,
       filename,
-      mimetype
+      mimetype,
+      language
     });
 
     return String(text || "").trim();

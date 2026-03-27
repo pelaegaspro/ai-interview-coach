@@ -38,6 +38,14 @@ function App() {
           <ControlPanel
             mode={coach.mode}
             setMode={coach.setMode}
+            experience={coach.experience}
+            setExperience={coach.setExperience}
+            jobJd={coach.jobJd}
+            setJobJd={coach.setJobJd}
+            aiModel={coach.aiModel}
+            setAiModel={coach.setAiModel}
+            language={coach.language}
+            setLanguage={coach.setLanguage}
             isListening={coach.isListening}
             isTranscribing={coach.isTranscribing}
             isGenerating={coach.isGenerating}

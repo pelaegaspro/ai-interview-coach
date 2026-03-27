@@ -12,30 +12,13 @@ const AUDIO_CHUNK_MS = 2000;
 const MAX_RESUME_CHARS = 8000;
 
 const INTERVIEW_MODES = [
-  {
-    id: "general",
-    label: "General",
-    prompt:
-      "Use a balanced interview-coaching style. Prioritize clarity, concise structure, confidence, and practical examples when the transcript does not clearly fit a specialized mode."
-  },
-  {
-    id: "data-analyst",
-    label: "Data Analyst",
-    prompt:
-      "Focus on metrics, business impact, experimentation, SQL fluency, dashboarding, data storytelling, and stakeholder communication."
-  },
-  {
-    id: "behavioral",
-    label: "Behavioral (HR)",
-    prompt:
-      "Treat the transcript as a behavioral prompt. Use a STAR-friendly structure, emphasize ownership, conflict resolution, leadership, learning, and measurable impact."
-  },
-  {
-    id: "sql-python",
-    label: "SQL / Python Technical",
-    prompt:
-      "Prioritize technical accuracy, structured problem solving, SQL reasoning, Python implementation details, edge cases, debugging, and clarity under pressure."
-  }
+  { id: "software-engineer", label: "Software Engineer", prompt: "Focus on coding, system design, DSA, and technical problem solving." },
+  { id: "data-scientist", label: "Data Scientist & Analyst", prompt: "Focus on statistical concepts, ML explanations, SQL, and data storytelling." },
+  { id: "product-manager", label: "Product Manager", prompt: "Focus on frameworks, estimation, strategic thinking, and user empathy." },
+  { id: "hr-recruiter", label: "HR & Recruiter", prompt: "Focus on policy knowledge, compliance, and situational responses." },
+  { id: "management-consultant", label: "Management Consultant", prompt: "Focus on case study frameworks, market sizing, and structured problem-solving." },
+  { id: "business-executive", label: "Business Executive", prompt: "Focus on board-level talking points, financial metrics, and strategic narratives." },
+  { id: "sales-professional", label: "Sales Professional", prompt: "Focus on objection handling, product positioning, and competitive intelligence." }
 ];
 
 function isSupportedMode(mode) {
@@ -46,9 +29,13 @@ function getModePrompt(mode) {
   return INTERVIEW_MODES.find((item) => item.id === mode)?.prompt || INTERVIEW_MODES[0].prompt;
 }
 
+function getModeLabel(mode) {
+  return INTERVIEW_MODES.find((item) => item.id === mode)?.label || "General Professional";
+}
+
 module.exports = {
   DEFAULT_BACKEND_PORT,
-  DEFAULT_MODE,
+  DEFAULT_MODE: "software-engineer",
   DEFAULT_OVERLAY_OPACITY,
   MIN_OVERLAY_OPACITY,
   MAX_OVERLAY_OPACITY,
@@ -60,5 +47,6 @@ module.exports = {
   MAX_RESUME_CHARS,
   INTERVIEW_MODES,
   isSupportedMode,
-  getModePrompt
+  getModePrompt,
+  getModeLabel
 };

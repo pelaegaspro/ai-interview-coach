@@ -1,34 +1,57 @@
-const { getModePrompt, MAX_RESUME_CHARS } = require("./constants");
+const { getModeLabel, MAX_RESUME_CHARS } = require("./constants");
 const { normalizeWhitespace, truncateText } = require("./text");
+const { ROLE_TEMPLATES } = require("../services/ai/templates/roleTemplates");
+const { TYPE_TEMPLATES } = require("../services/ai/templates/typeTemplates");
+const { DEPTH_TEMPLATES } = require("../services/ai/templates/depthTemplates");
+const { resolveDepth } = require("../services/ai/utils/depthResolver");
 
-function buildCoachSystemPrompt({ mode, resumeText }) {
+function buildCoachSystemPrompt({ mode, experience = "Not specified", jobJd = "", resumeText, type }) {
+    const depth = resolveDepth(experience);
   const cleanedResume = truncateText(normalizeWhitespace(resumeText || ""), MAX_RESUME_CHARS);
-  const resumeSection = cleanedResume
-    ? `Candidate resume context:\n${cleanedResume}`
-    : "Candidate resume context:\nNo resume has been uploaded yet. Do not invent any resume facts.";
+  const resumeContext = cleanedResume
+    ? `\nCandidate Resume:\n${cleanedResume}`
+    : "";
 
   return [
-    "You are AI Interview Coach, a fast overlay assistant for live job interviews.",
-    "Your answers must be glanceable, concise, and practical for a candidate under time pressure.",
-    "Never fabricate resume details, achievements, employers, metrics, or certifications.",
-    "If the transcript is noisy or incomplete, infer cautiously and keep coaching grounded.",
-    "Short answer must be at most two short lines.",
-    "Bullet points must be crisp and specific.",
-    "Use STAR guidance when the situation is behavioral; otherwise keep starSuggestion brief or empty.",
-    "Keywords must be short phrases, not sentences.",
-    "Coaching tips should help delivery, structure, and emphasis.",
-    `Mode guidance: ${getModePrompt(mode)}`,
+    "You are SilentAssist AI, an invisible desktop assistant providing real-time answers for live job interviews.",
+    `Role: ${getModeLabel(mode)}`,
+    `Experience: ${experience}`,
+    `Job Description: ${jobJd || "General"}`,
+    "",
+    "DEPTH CONTEXT:",
+    DEPTH_TEMPLATES[depth] || DEPTH_TEMPLATES.mid,
+    "",
+    "ROLE CONTEXT:",
+    ROLE_TEMPLATES[mode] || ROLE_TEMPLATES.general || "",
+    "",
+    "QUESTION TYPE CONTEXT:",
+    TYPE_TEMPLATES[type] || TYPE_TEMPLATES.general || "",
+    "",
+    resumeContext,
+    "",
+    "INSTRUCTIONS:",
+    "- Answer concisely",
+    "- Use bullet points",
+    "- Include examples",
+    "- Return STRICT JSON exactly matching this schema:",
+    `{
+  "shortAnswer": "Short draft in 1-2 lines",
+  "bulletPoints": ["point 1", "point 2"],
+  "starSuggestion": "STAR framework suggestion if behavioral, else empty string",
+  "keywords": ["key1", "key2"],
+  "followUpSuggestion": "Predicted next question",
+  "coachingTips": ["tip 1"]
+}`,
     resumeSection
-  ].join("\n\n");
+  ].join("\n");
 }
 
 function buildCoachUserPrompt(transcript) {
   return [
-    "Use the live transcript below as the latest interview context.",
-    "Provide a concise draft answer plus coaching suggestions.",
-    "If you are not confident about the exact question, still provide the best helpful interpretation.",
+    "Provide a concise draft answer and coaching suggestions for the following interview question.",
+    "If you are not confident about the exact question, provide the best helpful interpretation.",
     "",
-    "Live transcript:",
+    "Interview Context:",
     transcript
   ].join("\n");
 }

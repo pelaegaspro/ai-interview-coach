@@ -10,7 +10,8 @@ async function handleTranscribe(req, res, next) {
     const text = await transcribeBuffer({
       buffer: req.file.buffer,
       filename: req.file.originalname,
-      mimetype: req.file.mimetype
+      mimetype: req.file.mimetype,
+      language: req.body.language
     });
 
     res.json({

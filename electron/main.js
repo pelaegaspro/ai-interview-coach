@@ -163,7 +163,7 @@ function createWindow() {
     resizable: true,
     hasShadow: true,
     autoHideMenuBar: true,
-    title: "AI Coach",
+    title: "SilentAssist AI",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -175,6 +175,7 @@ function createWindow() {
   mainWindow.setAlwaysOnTop(true, "screen-saver");
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   mainWindow.setOpacity(overlayState.opacity);
+  mainWindow.setContentProtection(true);
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
   mainWindow.webContents.once("did-finish-load", () => {
     mainWindow.setContentProtection(true);
@@ -203,7 +204,7 @@ function createWindow() {
 }
 
 async function bootstrap() {
-  app.setAppUserModelId("AI Interview Coach");
+  app.setAppUserModelId("SilentAssist AI");
   backendInstance = await startServer(DEFAULT_BACKEND_PORT);
   configurePermissions();
   registerIpcHandlers();
@@ -212,7 +213,7 @@ async function bootstrap() {
 }
 
 app.whenReady().then(bootstrap).catch((error) => {
-  console.error("Failed to start AI Interview Coach:", error);
+  console.error("Failed to start SilentAssist AI:", error);
   app.quit();
 });
 

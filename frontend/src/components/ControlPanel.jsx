@@ -4,6 +4,14 @@ import StatusPill from "./StatusPill";
 function ControlPanel({
   mode,
   setMode,
+  experience,
+  setExperience,
+  jobJd,
+  setJobJd,
+  aiModel,
+  setAiModel,
+  language,
+  setLanguage,
   isListening,
   isTranscribing,
   isGenerating,
@@ -84,6 +92,73 @@ function ControlPanel({
             ))}
           </select>
         </div>
+
+        <details className="group rounded-2xl border border-white/10 bg-slate-950/45 p-3 open:pb-4 transition-all">
+          <summary className="cursor-pointer text-sm font-semibold text-white outline-none marker:text-cyan-400">
+            Advanced Context & AI Settings
+          </summary>
+          <div className="mt-4 grid gap-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  AI Model
+                </label>
+                <select
+                  value={aiModel}
+                  onChange={(event) => setAiModel(event.target.value)}
+                  className="rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300/35"
+                >
+                  <option value="gpt-5">GPT-5 (Recommended)</option>
+                  <option value="gpt-4.1">GPT-4.1</option>
+                </select>
+              </div>
+              <div className="grid gap-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Language
+                </label>
+                <select
+                  value={language}
+                  onChange={(event) => setLanguage(event.target.value)}
+                  className="rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300/35"
+                >
+                  <option value="auto">Auto-Detect (52+ Langs)</option>
+                  <option value="en">English (en)</option>
+                  <option value="es">Spanish (es)</option>
+                  <option value="fr">French (fr)</option>
+                  <option value="de">German (de)</option>
+                  <option value="zh">Chinese (zh)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="grid gap-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Experience Level
+                </label>
+                <input
+                  type="text"
+                  value={experience}
+                  onChange={(event) => setExperience(event.target.value)}
+                  placeholder="e.g. 5 Years"
+                  className="rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300/35"
+                />
+              </div>
+              <div className="grid gap-2">
+                <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Job Description
+                </label>
+                <input
+                  type="text"
+                  value={jobJd}
+                  onChange={(event) => setJobJd(event.target.value)}
+                  placeholder="Paste Job JD keywords..."
+                  className="rounded-2xl border border-white/10 bg-slate-950/80 px-4 py-3 text-sm text-slate-100 outline-none transition focus:border-cyan-300/35"
+                />
+              </div>
+            </div>
+          </div>
+        </details>
 
         <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-3">
           <div className="flex items-start justify-between gap-3">

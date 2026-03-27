@@ -1,6 +1,9 @@
 export const INTERVIEW_MODES = [
-  { id: "general", label: "General" },
-  { id: "data-analyst", label: "Data Analyst" },
-  { id: "behavioral", label: "Behavioral (HR)" },
-  { id: "sql-python", label: "SQL / Python Technical" }
+  { id: "software-engineer", label: "Software Engineer" },
+  { id: "data-scientist", label: "Data Scientist & Analyst" },
+  { id: "product-manager", label: "Product Manager" },
+  { id: "hr-recruiter", label: "HR & Recruiter" },
+  { id: "management-consultant", label: "Management Consultant" },
+  { id: "business-executive", label: "Business Executive" },
+  { id: "sales-professional", label: "Sales Professional" }
 ];

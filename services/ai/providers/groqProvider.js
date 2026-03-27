@@ -40,8 +40,9 @@ function getClient() {
   return client;
 }
 
-async function generateCoaching({ transcript, mode, resumeText }) {
+async function generateCoaching({ transcript, mode, experience, jobJd, model, resumeText, type, onChunk, signal }) {
   const groq = getClient();
+<<<<<<< Updated upstream
   const completion = await withRetry(() =>
     groq.chat.completions.create({
       model: process.env.GROQ_CHAT_MODEL || "llama-3.3-70b-versatile",
@@ -61,14 +62,56 @@ async function generateCoaching({ transcript, mode, resumeText }) {
       ]
     })
   );
+=======
+  let mappedModel = process.env.GROQ_CHAT_MODEL || "llama-3.3-70b-versatile";
+  if (model === "gpt-4.1") mappedModel = "mixtral-8x7b-32768";
 
-  const content = completion.choices[0]?.message?.content || "{}";
-  return coachResponseSchema.parse(JSON.parse(content));
+  let stream;
+  try {
+    stream = await groq.chat.completions.create({
+    model: mappedModel,
+    temperature: 0.2,
+    stream: true,
+    response_format: {
+      type: "json_object"
+    },
+    messages: [
+      {
+        role: "system",
+        content: `${buildCoachSystemPrompt({ mode, experience, jobJd, resumeText, type })}\nReturn valid JSON only.`
+      },
+      {
+        role: "user",
+        content: buildCoachUserPrompt(transcript)
+      }
+    ]
+  }, { signal });
+  } catch (e) {
+    if (e.name === "AbortError" || e.message?.toLowerCase().includes("abort")) return {};
+    throw e;
+  }
+>>>>>>> Stashed changes
+
+  let fullText = "";
+  for await (const chunk of stream) {
+    const delta = chunk.choices?.[0]?.delta?.content || "";
+    if (delta) {
+      fullText += delta;
+      if (onChunk) onChunk(delta, fullText);
+    }
+  }
+
+  try {
+    return JSON.parse(fullText);
+  } catch (e) {
+    return {};
+  }
 }
 
-async function transcribeAudio({ filePath }) {
+async function transcribeAudio({ filePath, language }) {
   const groq = getClient();
 
+<<<<<<< Updated upstream
   const transcription = await withRetry(() =>
     groq.audio.transcriptions.create({
       file: fs.createReadStream(filePath),
@@ -78,11 +121,27 @@ async function transcribeAudio({ filePath }) {
       temperature: 0
     })
   );
+=======
+  const transcriptionOptions = {
+    file: fs.createReadStream(filePath),
+    model: process.env.GROQ_TRANSCRIBE_MODEL || "whisper-large-v3-turbo",
+    response_format: "json",
+    temperature: 0
+  };
+
+  const finalLanguage = (language && language !== "auto") ? language : process.env.TRANSCRIBE_LANGUAGE;
+  if (finalLanguage && finalLanguage !== "auto") {
+    transcriptionOptions.language = finalLanguage;
+  }
+
+  const transcription = await groq.audio.transcriptions.create(transcriptionOptions);
+>>>>>>> Stashed changes
 
   return transcription.text || "";
 }
 
 module.exports = {
   generateCoaching,
-  transcribeAudio
+  transcribeAudio,
+  getClient
 };
