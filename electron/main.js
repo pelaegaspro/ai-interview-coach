@@ -175,6 +175,7 @@ function createWindow() {
   mainWindow.setAlwaysOnTop(true, "screen-saver");
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   mainWindow.setOpacity(overlayState.opacity);
+  mainWindow.setContentProtection(true);
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
 
   const frontendEntry = getFrontendEntry();
