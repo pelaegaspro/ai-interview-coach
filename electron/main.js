@@ -163,7 +163,7 @@ function createWindow() {
     resizable: true,
     hasShadow: true,
     autoHideMenuBar: true,
-    title: "SilentAssist AI",
+    title: "W AI",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
@@ -204,7 +204,7 @@ function createWindow() {
 }
 
 async function bootstrap() {
-  app.setAppUserModelId("SilentAssist AI");
+  app.setAppUserModelId("W AI");
   backendInstance = await startServer(DEFAULT_BACKEND_PORT);
   configurePermissions();
   registerIpcHandlers();
@@ -213,7 +213,7 @@ async function bootstrap() {
 }
 
 app.whenReady().then(bootstrap).catch((error) => {
-  console.error("Failed to start SilentAssist AI:", error);
+  console.error("Failed to start W AI:", error);
   app.quit();
 });
 

@@ -76,6 +76,14 @@ function ControlPanel({
           </button>
         </div>
 
+        <button
+          type="button"
+          onClick={() => window.dispatchEvent(new CustomEvent('triggerDemo'))}
+          className="rounded-2xl flex items-center justify-center gap-2 border border-indigo-500/50 bg-indigo-500/20 px-4 py-3 text-sm font-semibold text-indigo-200 transition hover:bg-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)]"
+        >
+          🎯 Try Demo Mode
+        </button>
+
         <div className="grid gap-2">
           <label className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
             Role Mode

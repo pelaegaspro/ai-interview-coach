@@ -96,6 +96,16 @@ export async function uploadAudioChunk(blob, language) {
   });
 }
 
+export async function improveAnswer(payload) {
+  return request("/improve", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+}
+
 export async function streamAsk(payload, signal, onChunk) {
   const { backendUrl } = await getAppConfig();
   const response = await fetch(`${backendUrl}/ask`, {

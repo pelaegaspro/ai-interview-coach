@@ -1,4 +1,4 @@
-const { generateCoaching } = require("../../services/ai/interviewCoachService");
+const { generateCoaching, improveAnswerDirect } = require("../../services/ai/interviewCoachService");
 const { AppError } = require("../../utils/errors");
 const { isSupportedMode } = require("../../utils/constants");
 
@@ -58,6 +58,20 @@ async function handleAsk(req, res, next) {
   }
 }
 
+async function handleImprove(req, res, next) {
+  try {
+    const { mode, question, previousAnswer } = req.body;
+    if (!mode || !question || !previousAnswer) {
+      throw new AppError("Missing Required Parameters", 400);
+    }
+    const improved = await improveAnswerDirect(mode, question, previousAnswer);
+    res.json(improved);
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
-  handleAsk
+  handleAsk,
+  handleImprove
 };

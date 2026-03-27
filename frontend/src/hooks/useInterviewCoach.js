@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { streamAsk, uploadAudioChunk, uploadResumePdf } from "../lib/apiClient";
+import { streamAsk, improveAnswer, uploadAudioChunk, uploadResumePdf } from "../lib/apiClient";
 import {
   AUDIO_CHUNK_MS,
   DEFAULT_MODE,
@@ -25,6 +25,7 @@ export function useInterviewCoach() {
   const [resumeStatus, setResumeStatus] = useState({
     message: "No resume uploaded yet. Upload a PDF to personalize every answer."
   });
+  const [isImproving, setIsImproving] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const streamRef = useRef(null);
@@ -205,12 +206,34 @@ export function useInterviewCoach() {
     setError("");
     setIsGenerating(false);
     setIsTranscribing(false);
+    setIsImproving(false);
 
     if (askAbortRef.current) {
       askAbortRef.current.abort();
       askAbortRef.current = null;
     }
   }, []);
+
+  const triggerImprove = useCallback(async () => {
+    if (!coaching || !coaching.shortAnswer || isImproving) return;
+    try {
+      setIsImproving(true);
+      const improved = await improveAnswer({ mode, question: liveContext, previousAnswer: coaching });
+      if (improved) {
+        setCoaching(improved);
+      }
+    } catch (e) {
+      console.error("Failed to manual improve answer", e);
+    } finally {
+      setIsImproving(false);
+    }
+  }, [coaching, mode, liveContext, isImproving]);
+
+  useEffect(() => {
+    const handleImproveEvent = () => triggerImprove();
+    window.addEventListener('triggerImproveAnswer', handleImproveEvent);
+    return () => window.removeEventListener('triggerImproveAnswer', handleImproveEvent);
+  }, [triggerImprove]);
 
   const uploadResume = useCallback(async (file) => {
     try {

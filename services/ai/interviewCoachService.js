@@ -6,6 +6,11 @@ const { answerCache } = require("../../utils/cache");
 const { classifyQuestion } = require("./utils/questionClassifier");
 const { classifyWithLLM } = require("./utils/llmClassifier");
 const { scoreAnswer } = require("./utils/answerScorer");
+const { improveAnswer } = require("./utils/answerImprover");
+const { loadMemory, saveMemory, findSimilar } = require("./utils/memoryStore");
+const { loadAnalytics, saveAnalytics } = require("../../store/analyticsStore");
+
+let memoryStore = loadMemory();
 
 function extractQuestion(transcript) {
   const sentences = transcript.split(/[?.!]/).map((s) => s.trim()).filter(Boolean);
@@ -32,6 +37,15 @@ async function generateCoaching({ transcript, mode = DEFAULT_MODE, experience, j
   }
   
   const cacheKey = `${mode}:${question.trim().toLowerCase()}`;
+
+  const smartCached = findSimilar(memoryStore, mode, question);
+  if (smartCached && smartCached.score >= 75) {
+    if (onChunk) {
+      onChunk(JSON.stringify(smartCached), JSON.stringify(smartCached));
+    }
+    return smartCached;
+  }
+
   if (answerCache.has(cacheKey)) {
     const cached = answerCache.get(cacheKey);
     if (onChunk) {
@@ -61,6 +75,19 @@ async function generateCoaching({ transcript, mode = DEFAULT_MODE, experience, j
       const scoreData = await scoreAnswer(question, scoreTextContext);
       score = scoreData.score;
       feedback = scoreData.feedback;
+
+      if (score !== null && score < 70 && question.length >= 10) {
+        improveAnswer(question, JSON.stringify(result)).then((improved) => {
+          if (improved && improved.shortAnswer) {
+             const learnedAnswer = { ...formattedResult, ...improved, score: Math.max(90, score + 20), feedback: "Auto-improved from historical cache", type, source: "MEMORY" };
+             memoryStore[cacheKey] = learnedAnswer;
+             saveMemory(memoryStore);
+          }
+        }).catch(() => {});
+      } else if (score !== null && score >= 75 && question.length >= 10) {
+        memoryStore[cacheKey] = { ...formattedResult, score, feedback, source: "MEMORY" };
+        saveMemory(memoryStore);
+      }
     }
   } catch (err) {
     // Scoring fallback
@@ -88,9 +115,35 @@ async function generateCoaching({ transcript, mode = DEFAULT_MODE, experience, j
   }
   answerCache.set(cacheKey, formattedResult);
 
+  try {
+    const analytics = loadAnalytics();
+    analytics.push({
+      question,
+      type,
+      score,
+      timestamp: Date.now()
+    });
+    saveAnalytics(analytics);
+  } catch (e) {}
+
   return formattedResult;
 }
 
+async function improveAnswerDirect(mode, question, previousAnswer) {
+  const cacheKey = `${mode}:${question.trim().toLowerCase()}`;
+  const { improveAnswer } = require("./utils/answerImprover");
+  const improved = await improveAnswer(question, JSON.stringify(previousAnswer));
+  
+  if (improved && improved.shortAnswer) {
+    const finalObj = { ...previousAnswer, ...improved, score: 95, feedback: "Manually improved from feedback.", source: "MEMORY" };
+    memoryStore[cacheKey] = finalObj;
+    saveMemory(memoryStore);
+    return finalObj;
+  }
+  return previousAnswer;
+}
+
 module.exports = {
-  generateCoaching
+  generateCoaching,
+  improveAnswerDirect
 };

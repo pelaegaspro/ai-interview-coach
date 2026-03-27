@@ -13,7 +13,7 @@ function buildCoachSystemPrompt({ mode, experience = "Not specified", jobJd = ""
     : "";
 
   return [
-    "You are SilentAssist AI, an invisible desktop assistant providing real-time answers for live job interviews.",
+    "You are W AI, an invisible desktop assistant providing real-time answers for live job interviews.",
     `Role: ${getModeLabel(mode)}`,
     `Experience: ${experience}`,
     `Job Description: ${jobJd || "General"}`,

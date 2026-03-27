@@ -1,9 +1,10 @@
 const express = require("express");
 const multer = require("multer");
-const { handleAsk } = require("../controllers/askController");
+const { handleAsk, handleImprove } = require("../controllers/askController");
 const { handleTranscribe } = require("../controllers/transcribeController");
 const { handleResumeUpload } = require("../controllers/resumeController");
 const { clearResumeText } = require("../store/sessionStore");
+const { getAnalytics } = require("../controllers/analyticsController");
 
 const router = express.Router();
 
@@ -16,6 +17,8 @@ const upload = multer({
 
 router.post("/transcribe", upload.single("audio"), handleTranscribe);
 router.post("/ask", handleAsk);
+router.post("/improve", handleImprove);
+router.get("/analytics", getAnalytics);
 router.post("/resume/upload", upload.single("resume"), handleResumeUpload);
 router.delete("/resume", (_req, res) => {
   clearResumeText();
