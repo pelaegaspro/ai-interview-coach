@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --overlay-bg: rgba(10, 15, 30, 0.72);
   color-scheme: dark;
   font-family: "Segoe UI Variable Text", "Segoe UI", "Trebuchet MS", sans-serif;
   background: transparent;

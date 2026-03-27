@@ -44,55 +44,57 @@ function CoachPanel({ coaching, isGenerating, provider }) {
         </div>
       </div>
 
-      <div className="mt-4 grid gap-3">
-        <Section title="Short Answer">
-          <p className="leading-6 text-slate-50">{coaching.shortAnswer}</p>
-        </Section>
-
-        <Section title="Bullet Points">
-          <ul className="space-y-2">
-            {coaching.bulletPoints.map((point) => (
-              <li key={point} className="flex gap-2 leading-6 text-slate-100">
-                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-cyan-300" />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
-
-        {coaching.starSuggestion ? (
-          <Section title="STAR Suggestion">
-            <p className="leading-6 text-slate-100">{coaching.starSuggestion}</p>
+      <div style={{ maxHeight: "340px", overflowY: "auto", paddingRight: "4px" }}>
+        <div className="mt-4 grid gap-3">
+          <Section title="Short Answer">
+            <p className="leading-6 text-slate-50">{coaching.shortAnswer}</p>
           </Section>
-        ) : null}
 
-        <Section title="Keywords">
-          <div className="flex flex-wrap gap-2">
-            {coaching.keywords.map((keyword) => (
-              <span
-                key={keyword}
-                className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-cyan-50"
-              >
-                {keyword}
-              </span>
-            ))}
-          </div>
-        </Section>
+          <Section title="Bullet Points">
+            <ul className="space-y-2">
+              {coaching.bulletPoints.map((point) => (
+                <li key={point} className="flex gap-2 leading-6 text-slate-100">
+                  <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-cyan-300" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </Section>
 
-        <Section title="Follow-Up Suggestion">
-          <p className="leading-6 text-slate-100">{coaching.followUpSuggestion}</p>
-        </Section>
+          {coaching.starSuggestion ? (
+            <Section title="STAR Suggestion">
+              <p className="leading-6 text-slate-100">{coaching.starSuggestion}</p>
+            </Section>
+          ) : null}
 
-        <Section title="Coaching Tips">
-          <ul className="space-y-2">
-            {coaching.coachingTips.map((tip) => (
-              <li key={tip} className="flex gap-2 leading-6 text-slate-100">
-                <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-amber-300" />
-                <span>{tip}</span>
-              </li>
-            ))}
-          </ul>
-        </Section>
+          <Section title="Keywords">
+            <div className="flex flex-wrap gap-2">
+              {coaching.keywords.map((keyword) => (
+                <span
+                  key={keyword}
+                  className="rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-cyan-50"
+                >
+                  {keyword}
+                </span>
+              ))}
+            </div>
+          </Section>
+
+          <Section title="Follow-Up Suggestion">
+            <p className="leading-6 text-slate-100">{coaching.followUpSuggestion}</p>
+          </Section>
+
+          <Section title="Coaching Tips">
+            <ul className="space-y-2">
+              {coaching.coachingTips.map((tip) => (
+                <li key={tip} className="flex gap-2 leading-6 text-slate-100">
+                  <span className="mt-[9px] h-1.5 w-1.5 rounded-full bg-amber-300" />
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </Section>
+        </div>
       </div>
     </section>
   );

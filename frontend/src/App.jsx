@@ -15,7 +15,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-transparent p-3 text-slate-100">
-      <div className="relative overflow-hidden rounded-[30px] border border-white/10 bg-mesh-dark shadow-glow">
+      <div
+        style={{ background: "var(--overlay-bg, rgba(10,15,30,0.72))" }}
+        className="relative overflow-hidden rounded-[30px] border border-white/10 shadow-glow"
+      >
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_35%),linear-gradient(180deg,rgba(15,23,42,0.16),transparent_40%)]" />
 
         <Header

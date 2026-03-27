@@ -16,8 +16,14 @@ function getResumeMetadata() {
   return state.resumeMetadata;
 }
 
+function clearResumeText() {
+  state.resumeText = "";
+  state.resumeMetadata = null;
+}
+
 module.exports = {
   setResumeText,
   getResumeText,
-  getResumeMetadata
+  getResumeMetadata,
+  clearResumeText
 };

@@ -8,7 +8,7 @@ const CLICK_THROUGH_SHORTCUT_ACCELERATOR = "CommandOrControl+Shift+M";
 const OVERLAY_SHORTCUT_LABEL = process.platform === "darwin" ? "Cmd+Shift+A" : "Ctrl+Shift+A";
 const CLICK_THROUGH_SHORTCUT_LABEL =
   process.platform === "darwin" ? "Cmd+Shift+M" : "Ctrl+Shift+M";
-const AUDIO_CHUNK_MS = 4000;
+const AUDIO_CHUNK_MS = 2000;
 const MAX_RESUME_CHARS = 8000;
 
 const INTERVIEW_MODES = [
