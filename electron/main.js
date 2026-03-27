@@ -175,8 +175,10 @@ function createWindow() {
   mainWindow.setAlwaysOnTop(true, "screen-saver");
   mainWindow.setVisibleOnAllWorkspaces(true, { visibleOnFullScreen: true });
   mainWindow.setOpacity(overlayState.opacity);
-  mainWindow.setContentProtection(true);
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
+  mainWindow.webContents.once("did-finish-load", () => {
+    mainWindow.setContentProtection(true);
+  });
 
   const frontendEntry = getFrontendEntry();
   if (frontendEntry.startsWith("http")) {
